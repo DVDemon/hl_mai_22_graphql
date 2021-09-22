@@ -12,117 +12,205 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include "database.h"
+
+#include "../config/config.h"
+#include <Poco/Data/MySQL/Connector.h>
+#include <Poco/Data/MySQL/MySQLException.h>
+#include <Poco/Data/SessionFactory.h>
+#include <Poco/JSON/Parser.h>
+#include <Poco/Dynamic/Var.h>
+
+using namespace Poco::Data::Keywords;
+using Poco::Data::Session;
+using Poco::Data::Statement;
 
 using namespace std::literals;
 
-namespace graphql::database {
-namespace object {
-
-Author::Author()
-	: service::Object({
-		"Author"
-	}, {
-		{ R"gql(id)gql"sv, [this](service::ResolverParams&& params) { return resolveId(std::move(params)); } },
-		{ R"gql(email)gql"sv, [this](service::ResolverParams&& params) { return resolveEmail(std::move(params)); } },
-		{ R"gql(title)gql"sv, [this](service::ResolverParams&& params) { return resolveTitle(std::move(params)); } },
-		{ R"gql(last_name)gql"sv, [this](service::ResolverParams&& params) { return resolveLast_name(std::move(params)); } },
-		{ R"gql(__typename)gql"sv, [this](service::ResolverParams&& params) { return resolve_typename(std::move(params)); } },
-		{ R"gql(first_name)gql"sv, [this](service::ResolverParams&& params) { return resolveFirst_name(std::move(params)); } }
-	})
+namespace graphql::database
 {
-}
+	namespace object
+	{
 
-service::FieldResult<std::optional<response::IntType>> Author::getId(service::FieldParams&&) const
-{
-	throw std::runtime_error(R"ex(Author::getId is not implemented)ex");
-}
+		Author::Author()
+			: service::Object({"Author"}, {{R"gql(id)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolveId(std::move(params)); }},
+										   {R"gql(email)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolveEmail(std::move(params)); }},
+										   {R"gql(title)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolveTitle(std::move(params)); }},
+										   {R"gql(last_name)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolveLast_name(std::move(params)); }},
+										   {R"gql(__typename)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolve_typename(std::move(params)); }},
+										   {R"gql(first_name)gql"sv, [this](service::ResolverParams &&params)
+											{ return resolveFirst_name(std::move(params)); }}})
+		{
+			_id = 0;
+		}
 
-std::future<service::ResolverResult> Author::resolveId(service::ResolverParams&& params)
-{
-	std::unique_lock resolverLock(_resolverMutex);
-	auto directives = std::move(params.fieldDirectives);
-	auto result = getId(service::FieldParams(std::move(params), std::move(directives)));
-	resolverLock.unlock();
+		Author::Author(long id) : Author()
+		{
+			id = _id;
+			try
+			{
+				Poco::Data::Session session = ::db::Database::get().create_session_read();
+				Poco::Data::Statement select(session);
 
-	return service::ModifiedResult<response::IntType>::convert<service::TypeModifier::Nullable>(std::move(result), std::move(params));
-}
+				select << "SELECT id, first_name, last_name, email, title FROM Author where id=?",
+					into(_id),
+					into(_first_name),
+					into(_last_name),
+					into(_email),
+					into(_title),
+					use(id),
+					range(0, 1); //  iterate over result set one row at a time
 
-service::FieldResult<response::StringType> Author::getFirst_name(service::FieldParams&&) const
-{
-	throw std::runtime_error(R"ex(Author::getFirst_name is not implemented)ex");
-}
+				if (!select.done())
+				{
+					select.execute();
+				}
+			}
 
-std::future<service::ResolverResult> Author::resolveFirst_name(service::ResolverParams&& params)
-{
-	std::unique_lock resolverLock(_resolverMutex);
-	auto directives = std::move(params.fieldDirectives);
-	auto result = getFirst_name(service::FieldParams(std::move(params), std::move(directives)));
-	resolverLock.unlock();
+			catch (Poco::Data::MySQL::ConnectionException &e)
+			{
+				std::cout << "connection:" << e.what() << std::endl;
+				throw;
+			}
+			catch (Poco::Data::MySQL::StatementException &e)
+			{
 
-	return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
-}
+				std::cout << "statement:" << e.what() << std::endl;
+				throw;
+			}
+		}
 
-service::FieldResult<response::StringType> Author::getLast_name(service::FieldParams&&) const
-{
-	throw std::runtime_error(R"ex(Author::getLast_name is not implemented)ex");
-}
+		std::vector<std::shared_ptr<Author>> Author::read_all()
+		{
+			try
+			{
+				Poco::Data::Session session = ::db::Database::get().create_session_read();
+				Statement select(session);
+				std::vector<std::shared_ptr<Author>> result;
+				std::shared_ptr<Author> a = std::make_shared<Author>();
+				select << "SELECT id, first_name, last_name, email, title FROM Author",
+					into(a->_id),
+					into(a->_first_name),
+					into(a->_last_name),
+					into(a->_email),
+					into(a->_title),
+					range(0, 1); //  iterate over result set one row at a time
 
-std::future<service::ResolverResult> Author::resolveLast_name(service::ResolverParams&& params)
-{
-	std::unique_lock resolverLock(_resolverMutex);
-	auto directives = std::move(params.fieldDirectives);
-	auto result = getLast_name(service::FieldParams(std::move(params), std::move(directives)));
-	resolverLock.unlock();
+				while (!select.done())
+				{
+					select.execute();
+					result.push_back(a);
+				}
+				return result;
+			}
 
-	return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
-}
+			catch (Poco::Data::MySQL::ConnectionException &e)
+			{
+				std::cout << "connection:" << e.what() << std::endl;
+				throw;
+			}
+			catch (Poco::Data::MySQL::StatementException &e)
+			{
 
-service::FieldResult<response::StringType> Author::getEmail(service::FieldParams&&) const
-{
-	throw std::runtime_error(R"ex(Author::getEmail is not implemented)ex");
-}
+				std::cout << "statement:" << e.what() << std::endl;
+				throw;
+			}
+		}
 
-std::future<service::ResolverResult> Author::resolveEmail(service::ResolverParams&& params)
-{
-	std::unique_lock resolverLock(_resolverMutex);
-	auto directives = std::move(params.fieldDirectives);
-	auto result = getEmail(service::FieldParams(std::move(params), std::move(directives)));
-	resolverLock.unlock();
+		service::FieldResult<std::optional<response::IntType>> Author::getId(service::FieldParams &&) const
+		{
+			return _id;
+		}
 
-	return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
-}
+		std::future<service::ResolverResult> Author::resolveId(service::ResolverParams &&params)
+		{
+			std::unique_lock resolverLock(_resolverMutex);
+			auto directives = std::move(params.fieldDirectives);
+			auto result = getId(service::FieldParams(std::move(params), std::move(directives)));
+			resolverLock.unlock();
 
-service::FieldResult<response::StringType> Author::getTitle(service::FieldParams&&) const
-{
-	throw std::runtime_error(R"ex(Author::getTitle is not implemented)ex");
-}
+			return service::ModifiedResult<response::IntType>::convert<service::TypeModifier::Nullable>(std::move(result), std::move(params));
+		}
 
-std::future<service::ResolverResult> Author::resolveTitle(service::ResolverParams&& params)
-{
-	std::unique_lock resolverLock(_resolverMutex);
-	auto directives = std::move(params.fieldDirectives);
-	auto result = getTitle(service::FieldParams(std::move(params), std::move(directives)));
-	resolverLock.unlock();
+		service::FieldResult<response::StringType> Author::getFirst_name(service::FieldParams &&) const
+		{
+			return _first_name;
+		}
 
-	return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
-}
+		std::future<service::ResolverResult> Author::resolveFirst_name(service::ResolverParams &&params)
+		{
+			std::unique_lock resolverLock(_resolverMutex);
+			auto directives = std::move(params.fieldDirectives);
+			auto result = getFirst_name(service::FieldParams(std::move(params), std::move(directives)));
+			resolverLock.unlock();
 
-std::future<service::ResolverResult> Author::resolve_typename(service::ResolverParams&& params)
-{
-	return service::ModifiedResult<response::StringType>::convert(response::StringType{ R"gql(Author)gql" }, std::move(params));
-}
+			return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
+		}
 
-} // namespace object
+		service::FieldResult<response::StringType> Author::getLast_name(service::FieldParams &&) const
+		{
+			return _last_name;
+		}
 
-void AddAuthorDetails(std::shared_ptr<schema::ObjectType> typeAuthor, const std::shared_ptr<schema::Schema>& schema)
-{
-	typeAuthor->AddFields({
-		schema::Field::Make(R"gql(id)gql"sv, R"md()md"sv, std::nullopt, schema->LookupType("Int")),
-		schema::Field::Make(R"gql(first_name)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
-		schema::Field::Make(R"gql(last_name)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
-		schema::Field::Make(R"gql(email)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
-		schema::Field::Make(R"gql(title)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String")))
-	});
-}
+		std::future<service::ResolverResult> Author::resolveLast_name(service::ResolverParams &&params)
+		{
+			std::unique_lock resolverLock(_resolverMutex);
+			auto directives = std::move(params.fieldDirectives);
+			auto result = getLast_name(service::FieldParams(std::move(params), std::move(directives)));
+			resolverLock.unlock();
+
+			return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
+		}
+
+		service::FieldResult<response::StringType> Author::getEmail(service::FieldParams &&) const
+		{
+			return _email;
+		}
+
+		std::future<service::ResolverResult> Author::resolveEmail(service::ResolverParams &&params)
+		{
+			std::unique_lock resolverLock(_resolverMutex);
+			auto directives = std::move(params.fieldDirectives);
+			auto result = getEmail(service::FieldParams(std::move(params), std::move(directives)));
+			resolverLock.unlock();
+
+			return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
+		}
+
+		service::FieldResult<response::StringType> Author::getTitle(service::FieldParams &&) const
+		{
+			return _title;
+		}
+
+		std::future<service::ResolverResult> Author::resolveTitle(service::ResolverParams &&params)
+		{
+			std::unique_lock resolverLock(_resolverMutex);
+			auto directives = std::move(params.fieldDirectives);
+			auto result = getTitle(service::FieldParams(std::move(params), std::move(directives)));
+			resolverLock.unlock();
+
+			return service::ModifiedResult<response::StringType>::convert(std::move(result), std::move(params));
+		}
+
+		std::future<service::ResolverResult> Author::resolve_typename(service::ResolverParams &&params)
+		{
+			return service::ModifiedResult<response::StringType>::convert(response::StringType{R"gql(Author)gql"}, std::move(params));
+		}
+
+	} // namespace object
+
+	void AddAuthorDetails(std::shared_ptr<schema::ObjectType> typeAuthor, const std::shared_ptr<schema::Schema> &schema)
+	{
+		typeAuthor->AddFields({schema::Field::Make(R"gql(id)gql"sv, R"md()md"sv, std::nullopt, schema->LookupType("Int")),
+							   schema::Field::Make(R"gql(first_name)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
+							   schema::Field::Make(R"gql(last_name)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
+							   schema::Field::Make(R"gql(email)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String"))),
+							   schema::Field::Make(R"gql(title)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String")))});
+	}
 
 } // namespace graphql::database

@@ -33,3 +33,4 @@
 
 CMakeFiles/*
 .vscode/*
+build/*

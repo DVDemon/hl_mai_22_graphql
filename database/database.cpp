@@ -1,7 +1,7 @@
 #include "database.h"
 #include "../config/config.h"
 
-namespace database{
+namespace db{
     Database::Database(){
         _connection_string_read+="host=";
         _connection_string_read+=Config::get().get_read_request_ip();

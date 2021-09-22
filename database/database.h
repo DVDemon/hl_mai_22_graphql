@@ -6,7 +6,7 @@
 #include <Poco/Data/MySQL/MySQLException.h>
 #include <Poco/Data/SessionFactory.h>
 
-namespace database{
+namespace db{
     class Database{
         private:
             std::string _connection_string_read;
