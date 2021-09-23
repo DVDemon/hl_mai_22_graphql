@@ -59,7 +59,7 @@ public:
         rsp.setChunkedTransferEncoding(true);
         rsp.setContentType("text/json");
 
-        //std::ostream& ostr = rsp.send();
+        std::ostream& ostr = rsp.send();
         auto query = std::make_shared<graphql::database::object::Query>();
         auto service = std::make_shared<graphql::database::Operations>(query);
 
@@ -82,13 +82,13 @@ public:
 
             std::cout << "Executing query..." << std::endl;
 
-            /*ostr << graphql::response::toJSON(service
+            ostr << graphql::response::toJSON(service
                                               ->resolve(nullptr,
                                                         query,
                                                         "",
                                                         graphql::response::Value(graphql::response::Type::Map))
                                               .get())
-                      << std::endl;*/
+                      << std::endl;
         }
         catch (const std::runtime_error &ex)
         {

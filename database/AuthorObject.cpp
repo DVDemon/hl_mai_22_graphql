@@ -49,20 +49,20 @@ namespace graphql::database
 			_id = 0;
 		}
 
-		Author::Author(long id) : Author()
+		std::shared_ptr<Author> Author::get(long id)
 		{
-			id = _id;
+			std::shared_ptr<Author> result;
 			try
 			{
 				Poco::Data::Session session = ::db::Database::get().create_session_read();
 				Poco::Data::Statement select(session);
-
+				result = std::make_shared<Author>();
 				select << "SELECT id, first_name, last_name, email, title FROM Author where id=?",
-					into(_id),
-					into(_first_name),
-					into(_last_name),
-					into(_email),
-					into(_title),
+					into(result->_id),
+					into(result->_first_name),
+					into(result->_last_name),
+					into(result->_email),
+					into(result->_title),
 					use(id),
 					range(0, 1); //  iterate over result set one row at a time
 
@@ -70,21 +70,61 @@ namespace graphql::database
 				{
 					select.execute();
 				}
+				return result;
 			}
 
 			catch (Poco::Data::MySQL::ConnectionException &e)
 			{
 				std::cout << "connection:" << e.what() << std::endl;
-				throw;
+				//throw;
 			}
 			catch (Poco::Data::MySQL::StatementException &e)
 			{
 
 				std::cout << "statement:" << e.what() << std::endl;
-				throw;
+				//throw;
 			}
+
+			return std::shared_ptr<Author>();
 		}
 
+		std::vector<std::shared_ptr<Author>> Author::search(std::string first_name, std::string last_name){
+			try
+        {
+            Poco::Data::Session session = ::db::Database::get().create_session_read();
+            Statement select(session);
+            std::vector<std::shared_ptr<Author>> result;
+            std::shared_ptr<Author> a = std::make_shared<Author>();
+            select << "SELECT id, first_name, last_name, email, title FROM Author where first_name LIKE ? and last_name LIKE ?",
+                into(a->_id),
+                into(a->_first_name),
+                into(a->_last_name),
+                into(a->_email),
+                into(a->_title),
+                use(first_name),
+                use(last_name),
+                range(0, 1); //  iterate over result set one row at a time
+
+            while (!select.done())
+            {
+                select.execute();
+                result.push_back(a);
+            }
+            return result;
+        }
+
+        catch (Poco::Data::MySQL::ConnectionException &e)
+        {
+            std::cout << "connection:" << e.what() << std::endl;
+            throw;
+        }
+        catch (Poco::Data::MySQL::StatementException &e)
+        {
+
+            std::cout << "statement:" << e.what() << std::endl;
+            throw;
+        }
+		}
 		std::vector<std::shared_ptr<Author>> Author::read_all()
 		{
 			try

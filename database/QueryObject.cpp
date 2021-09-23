@@ -12,6 +12,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include <iostream>
 
 using namespace std::literals;
 
@@ -33,9 +34,14 @@ Query::Query()
 {
 }
 
-service::FieldResult<std::shared_ptr<Author>> Query::getAuthor(service::FieldParams&&, std::optional<response::IntType>&&) const
+service::FieldResult<std::shared_ptr<Author>> Query::getAuthor([[maybe_unused]] service::FieldParams&& params, std::optional<response::IntType>&& id) const
 {
-	throw std::runtime_error(R"ex(Query::getAuthor is not implemented)ex");
+	std::shared_ptr<Author> result;
+	if(id){
+		std::cout << id.value() << std::endl;
+		result = Author::get(id.value());
+	}
+	return result;
 }
 
 std::future<service::ResolverResult> Query::resolveAuthor(service::ResolverParams&& params)

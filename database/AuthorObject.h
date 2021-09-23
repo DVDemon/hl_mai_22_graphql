@@ -35,7 +35,9 @@ namespace graphql::database::object
 		virtual service::FieldResult<response::StringType> getEmail(service::FieldParams &&params) const;
 		virtual service::FieldResult<response::StringType> getTitle(service::FieldParams &&params) const;
 
+		static std::shared_ptr<Author> get(long id);
 		static std::vector<std::shared_ptr<Author>> read_all();
+		static std::vector<std::shared_ptr<Author>> search(std::string first_name, std::string last_name);
 
 	private:
 		std::future<service::ResolverResult> resolveId(service::ResolverParams &&params);
