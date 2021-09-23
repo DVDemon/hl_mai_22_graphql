@@ -57,7 +57,8 @@ std::future<service::ResolverResult> Query::resolveAuthor(service::ResolverParam
 
 service::FieldResult<std::optional<std::vector<std::shared_ptr<Author>>>> Query::getAllAuthors(service::FieldParams&&) const
 {
-	throw std::runtime_error(R"ex(Query::getAllAuthors is not implemented)ex");
+	std::vector<std::shared_ptr<Author>> result = Author::read_all();
+	return result;
 }
 
 std::future<service::ResolverResult> Query::resolveAllAuthors(service::ResolverParams&& params)
