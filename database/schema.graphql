@@ -5,7 +5,7 @@ schema {
 type Query {
   author(id: Int): Author
   allAuthors: [Author]
-  search(term: String!): [Author!]!
+  search(term1: String!,term2: String!): [Author!]!
 }
 
 type Author  {
