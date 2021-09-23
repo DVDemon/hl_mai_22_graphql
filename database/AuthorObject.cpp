@@ -49,6 +49,17 @@ namespace graphql::database
 			_id = 0;
 		}
 
+		Author& Author::operator=(const Author &other){
+
+			_id = other._id;
+			_first_name = other._first_name;
+			_last_name = other._last_name;
+			_email = other._email;
+			_title = other._title;
+			return *this;
+
+		}
+
 		std::shared_ptr<Author> Author::get(long id)
 		{
 			std::shared_ptr<Author> result;
@@ -94,13 +105,13 @@ namespace graphql::database
             Poco::Data::Session session = ::db::Database::get().create_session_read();
             Statement select(session);
             std::vector<std::shared_ptr<Author>> result;
-            std::shared_ptr<Author> a = std::make_shared<Author>();
+            Author a;
             select << "SELECT id, first_name, last_name, email, title FROM Author where first_name LIKE ? and last_name LIKE ?",
-                into(a->_id),
-                into(a->_first_name),
-                into(a->_last_name),
-                into(a->_email),
-                into(a->_title),
+                into(a._id),
+                into(a._first_name),
+                into(a._last_name),
+                into(a._email),
+                into(a._title),
                 use(first_name),
                 use(last_name),
                 range(0, 1); //  iterate over result set one row at a time
@@ -108,7 +119,9 @@ namespace graphql::database
             while (!select.done())
             {
                 select.execute();
-                result.push_back(a);
+				std::shared_ptr<Author> ptr = std::make_shared<Author>();
+				*ptr = a;
+				result.push_back(ptr);
             }
             return result;
         }
@@ -132,19 +145,21 @@ namespace graphql::database
 				Poco::Data::Session session = ::db::Database::get().create_session_read();
 				Statement select(session);
 				std::vector<std::shared_ptr<Author>> result;
-				std::shared_ptr<Author> a = std::make_shared<Author>();
+				Author a;
 				select << "SELECT id, first_name, last_name, email, title FROM Author",
-					into(a->_id),
-					into(a->_first_name),
-					into(a->_last_name),
-					into(a->_email),
-					into(a->_title),
+					into(a._id),
+					into(a._first_name),
+					into(a._last_name),
+					into(a._email),
+					into(a._title),
 					range(0, 1); //  iterate over result set one row at a time
 
 				while (!select.done())
 				{
 					select.execute();
-					result.push_back(a);
+					std::shared_ptr<Author> ptr = std::make_shared<Author>();
+					*ptr = a;
+					result.push_back(ptr);
 				}
 				return result;
 			}

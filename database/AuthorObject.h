@@ -39,6 +39,8 @@ namespace graphql::database::object
 		static std::vector<std::shared_ptr<Author>> read_all();
 		static std::vector<std::shared_ptr<Author>> search(std::string first_name, std::string last_name);
 
+		Author& operator=(const Author &other);
+
 	private:
 		std::future<service::ResolverResult> resolveId(service::ResolverParams &&params);
 		std::future<service::ResolverResult> resolveFirst_name(service::ResolverParams &&params);

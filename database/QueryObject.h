@@ -22,7 +22,7 @@ public:
 	Query();
 	virtual service::FieldResult<std::shared_ptr<Author>> getAuthor(service::FieldParams&& params, std::optional<response::IntType>&& idArg) const;
 	virtual service::FieldResult<std::optional<std::vector<std::shared_ptr<Author>>>> getAllAuthors(service::FieldParams&& params) const;
-	virtual service::FieldResult<std::vector<std::shared_ptr<Author>>> getSearch(service::FieldParams&& params, response::StringType&& termArg) const;
+	virtual service::FieldResult<std::vector<std::shared_ptr<Author>>> getSearch(service::FieldParams&& params, response::StringType&& termArg1, response::StringType&& termArg2) const;
 
 private:
 	std::future<service::ResolverResult> resolveAuthor(service::ResolverParams&& params);

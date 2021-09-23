@@ -71,17 +71,20 @@ std::future<service::ResolverResult> Query::resolveAllAuthors(service::ResolverP
 	return service::ModifiedResult<Author>::convert<service::TypeModifier::Nullable, service::TypeModifier::List, service::TypeModifier::Nullable>(std::move(result), std::move(params));
 }
 
-service::FieldResult<std::vector<std::shared_ptr<Author>>> Query::getSearch(service::FieldParams&&, response::StringType&&) const
+service::FieldResult<std::vector<std::shared_ptr<Author>>> Query::getSearch([[maybe_unused]] service::FieldParams&& param, response::StringType&& termArg1, response::StringType&& termArg2) const
 {
-	throw std::runtime_error(R"ex(Query::getSearch is not implemented)ex");
+	std::cout << termArg1 << "," << termArg2 << std::endl;
+	std::vector<std::shared_ptr<Author>> result = Author::search(termArg1,termArg2);
+	return result;
 }
 
 std::future<service::ResolverResult> Query::resolveSearch(service::ResolverParams&& params)
 {
-	auto argTerm = service::ModifiedArgument<response::StringType>::require("term", params.arguments);
+	auto argTerm1 = service::ModifiedArgument<response::StringType>::require("term1", params.arguments);
+	auto argTerm2 = service::ModifiedArgument<response::StringType>::require("term2", params.arguments);
 	std::unique_lock resolverLock(_resolverMutex);
 	auto directives = std::move(params.fieldDirectives);
-	auto result = getSearch(service::FieldParams(std::move(params), std::move(directives)), std::move(argTerm));
+	auto result = getSearch(service::FieldParams(std::move(params), std::move(directives)), std::move(argTerm1), std::move(argTerm2));
 	resolverLock.unlock();
 
 	return service::ModifiedResult<Author>::convert<service::TypeModifier::List>(std::move(result), std::move(params));
@@ -116,7 +119,8 @@ void AddQueryDetails(std::shared_ptr<schema::ObjectType> typeQuery, const std::s
 		}),
 		schema::Field::Make(R"gql(allAuthors)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::LIST, schema->LookupType("Author"))),
 		schema::Field::Make(R"gql(search)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->WrapType(introspection::TypeKind::LIST, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("Author")))), {
-			schema::InputValue::Make(R"gql(term)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String")), R"gql()gql"sv)
+			schema::InputValue::Make(R"gql(term1)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String")), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(term2)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType("String")), R"gql()gql"sv)
 		})
 	});
 }
