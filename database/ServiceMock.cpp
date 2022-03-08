@@ -14,11 +14,8 @@ namespace graphql::database::object
 
     std::shared_ptr<graphql::service::Request> GetService()
     {
-        //std::shared_ptr<QueryImpl> query_impl = ;
         std::shared_ptr<Query> query = std::make_shared<Query>(std::make_shared<QueryImpl>());
-
         auto service = std::make_shared<Operations>(std::move(query));
-
         return service;
     }
 
