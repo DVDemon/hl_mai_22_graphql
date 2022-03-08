@@ -45,7 +45,6 @@ using Poco::Util::ServerApplication;
 
 #include "../../database/ServiceMock.h"
 
-
 class GraphQLHandler : public HTTPRequestHandler
 {
 public:
@@ -59,7 +58,7 @@ public:
         rsp.setChunkedTransferEncoding(true);
         rsp.setContentType("text/json");
 
-        std::ostream& ostr = rsp.send();
+        std::ostream &ostr = rsp.send();
         auto service = graphql::database::object::GetService();
 
         try
@@ -77,13 +76,12 @@ public:
                 std::cerr << std::endl;
             }
 
-            ostr << graphql::response::toJSON(service->resolve({ query, ""}).get())
-                      << std::endl;
+            ostr << graphql::response::toJSON(service->resolve({query, ""}).get())
+                 << std::endl;
         }
         catch (const std::runtime_error &ex)
         {
             std::cerr << ex.what() << std::endl;
-
         }
     }
 
