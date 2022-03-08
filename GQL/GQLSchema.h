@@ -10,9 +10,9 @@
 
 #include "graphqlservice/internal/Schema.h"
 
-// Check if the library version is compatible with schemagen 3.6.0
-static_assert(graphql::internal::MajorVersion == 3, "regenerate with schemagen: major version mismatch");
-static_assert(graphql::internal::MinorVersion == 6, "regenerate with schemagen: minor version mismatch");
+// Check if the library version is compatible with schemagen 4.1.0
+static_assert(graphql::internal::MajorVersion == 4, "regenerate with schemagen: major version mismatch");
+static_assert(graphql::internal::MinorVersion == 1, "regenerate with schemagen: minor version mismatch");
 
 #include <memory>
 #include <string>
@@ -27,18 +27,24 @@ class Author;
 
 } // namespace object
 
-class Operations
+class Operations final
 	: public service::Request
 {
 public:
 	explicit Operations(std::shared_ptr<object::Query> query);
 
+	template <class TQuery>
+	explicit Operations(std::shared_ptr<TQuery> query)
+		: Operations { std::make_shared<object::Query>(std::move(query)) }
+	{
+	}
+
 private:
 	std::shared_ptr<object::Query> _query;
 };
 
-void AddQueryDetails(std::shared_ptr<schema::ObjectType> typeQuery, const std::shared_ptr<schema::Schema>& schema);
-void AddAuthorDetails(std::shared_ptr<schema::ObjectType> typeAuthor, const std::shared_ptr<schema::Schema>& schema);
+void AddQueryDetails(const std::shared_ptr<schema::ObjectType>& typeQuery, const std::shared_ptr<schema::Schema>& schema);
+void AddAuthorDetails(const std::shared_ptr<schema::ObjectType>& typeAuthor, const std::shared_ptr<schema::Schema>& schema);
 
 std::shared_ptr<schema::Schema> GetSchema();
 

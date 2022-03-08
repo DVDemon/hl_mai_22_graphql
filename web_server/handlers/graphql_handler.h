@@ -43,8 +43,8 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
-#include "../../database/GQLObjects.h"
-#include <graphqlservice/JSONResponse.h>
+#include "../../database/ServiceMock.h"
+
 
 class GraphQLHandler : public HTTPRequestHandler
 {
@@ -60,10 +60,7 @@ public:
         rsp.setContentType("text/json");
 
         std::ostream& ostr = rsp.send();
-        auto query = std::make_shared<graphql::database::object::Query>();
-        auto service = std::make_shared<graphql::database::Operations>(query);
-
-        std::cout << "Created the service..." << std::endl;
+        auto service = graphql::database::object::GetService();
 
         try
         {
@@ -80,14 +77,7 @@ public:
                 std::cerr << std::endl;
             }
 
-            std::cout << "Executing query..." << std::endl;
-
-            ostr << graphql::response::toJSON(service
-                                              ->resolve(nullptr,
-                                                        query,
-                                                        "",
-                                                        graphql::response::Value(graphql::response::Type::Map))
-                                              .get())
+            ostr << graphql::response::toJSON(service->resolve({ query, ""}).get())
                       << std::endl;
         }
         catch (const std::runtime_error &ex)
