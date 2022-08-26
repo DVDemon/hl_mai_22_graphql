@@ -15,7 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
-#include <tuple>
+#include <utility>
 #include <vector>
 
 using namespace std::literals;
@@ -25,7 +25,7 @@ namespace database {
 
 Operations::Operations(std::shared_ptr<object::Query> query)
 	: service::Request({
-		{ "query", query }
+		{ service::strQuery, query }
 	}, GetSchema())
 	, _query(std::move(query))
 {
@@ -51,7 +51,7 @@ std::shared_ptr<schema::Schema> GetSchema()
 
 	if (!schema)
 	{
-		schema = std::make_shared<schema::Schema>(true, R"md()md"sv);
+		schema = std::make_shared<schema::Schema>(false, R"md()md"sv);
 		introspection::AddTypesToSchema(schema);
 		AddTypesToSchema(schema);
 		s_wpSchema = schema;

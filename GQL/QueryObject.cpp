@@ -6,9 +6,10 @@
 #include "QueryObject.h"
 #include "AuthorObject.h"
 
-#include "graphqlservice/internal/Schema.h"
+#include "graphqlservice/internal/Introspection.h"
 
-#include "graphqlservice/introspection/IntrospectionSchema.h"
+#include "graphqlservice/introspection/SchemaObject.h"
+#include "graphqlservice/introspection/TypeObject.h"
 
 #include <algorithm>
 #include <functional>
@@ -23,6 +24,7 @@ namespace object {
 
 Query::Query(std::unique_ptr<const Concept>&& pimpl) noexcept
 	: service::Object{ getTypeNames(), getResolvers() }
+	, _schema { GetSchema() }
 	, _pimpl { std::move(pimpl) }
 {
 }
@@ -37,8 +39,10 @@ service::TypeNames Query::getTypeNames() const noexcept
 service::ResolverMap Query::getResolvers() const noexcept
 {
 	return {
+		{ R"gql(__type)gql"sv, [this](service::ResolverParams&& params) { return resolve_type(std::move(params)); } },
 		{ R"gql(author)gql"sv, [this](service::ResolverParams&& params) { return resolveAuthor(std::move(params)); } },
 		{ R"gql(search)gql"sv, [this](service::ResolverParams&& params) { return resolveSearch(std::move(params)); } },
+		{ R"gql(__schema)gql"sv, [this](service::ResolverParams&& params) { return resolve_schema(std::move(params)); } },
 		{ R"gql(__typename)gql"sv, [this](service::ResolverParams&& params) { return resolve_typename(std::move(params)); } },
 		{ R"gql(allAuthors)gql"sv, [this](service::ResolverParams&& params) { return resolveAllAuthors(std::move(params)); } }
 	};
@@ -89,7 +93,21 @@ service::AwaitableResolver Query::resolveSearch(service::ResolverParams&& params
 
 service::AwaitableResolver Query::resolve_typename(service::ResolverParams&& params) const
 {
-	return service::ModifiedResult<std::string>::convert(std::string{ R"gql(Query)gql" }, std::move(params));
+	return service::Result<std::string>::convert(std::string{ R"gql(Query)gql" }, std::move(params));
+}
+
+service::AwaitableResolver Query::resolve_schema(service::ResolverParams&& params) const
+{
+	return service::Result<service::Object>::convert(std::static_pointer_cast<service::Object>(std::make_shared<introspection::object::Schema>(std::make_shared<introspection::Schema>(_schema))), std::move(params));
+}
+
+service::AwaitableResolver Query::resolve_type(service::ResolverParams&& params) const
+{
+	auto argName = service::ModifiedArgument<std::string>::require("name", params.arguments);
+	const auto& baseType = _schema->LookupType(argName);
+	std::shared_ptr<introspection::object::Type> result { baseType ? std::make_shared<introspection::object::Type>(std::make_shared<introspection::Type>(baseType)) : nullptr };
+
+	return service::ModifiedResult<introspection::object::Type>::convert<service::TypeModifier::Nullable>(result, std::move(params));
 }
 
 } // namespace object

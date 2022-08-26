@@ -28,6 +28,7 @@ namespace graphql::database::object
 
     std::shared_ptr<Author> QueryImpl::getAuthor([[maybe_unused]] std::optional<int> &&idArg) const
     {
+
         auto author_impl = std::make_shared<AuthorImpl>();
         try
         {
@@ -64,6 +65,7 @@ namespace graphql::database::object
     {
         try
         {
+            std::cout << "getAll" << std::endl;
             Poco::Data::Session session = ::db::Database::get().create_session_read();
             Poco::Data::Statement select(session);
 

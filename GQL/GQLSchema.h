@@ -10,13 +10,14 @@
 
 #include "graphqlservice/internal/Schema.h"
 
-// Check if the library version is compatible with schemagen 4.1.0
+// Check if the library version is compatible with schemagen 4.5.0
 static_assert(graphql::internal::MajorVersion == 4, "regenerate with schemagen: major version mismatch");
-static_assert(graphql::internal::MinorVersion == 1, "regenerate with schemagen: minor version mismatch");
+static_assert(graphql::internal::MinorVersion == 5, "regenerate with schemagen: minor version mismatch");
 
+#include <array>
 #include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
 
 namespace graphql {
 namespace database {
@@ -27,7 +28,7 @@ class Author;
 
 } // namespace object
 
-class Operations final
+class [[nodiscard]] Operations final
 	: public service::Request
 {
 public:
@@ -35,7 +36,9 @@ public:
 
 	template <class TQuery>
 	explicit Operations(std::shared_ptr<TQuery> query)
-		: Operations { std::make_shared<object::Query>(std::move(query)) }
+		: Operations {
+			std::make_shared<object::Query>(std::move(query))
+		}
 	{
 	}
 

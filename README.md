@@ -1,27 +1,29 @@
 # Пример по курсу Архитектуре программных систем
+### GCC 11
+sudo apt install build-essential manpages-dev software-properties-common
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update && sudo apt install gcc-11 g++-11
 
 ### Зависимости
-
-https://graphql.org/graphql-js/language/
-
 https://github.com/Tencent/rapidjson.git
-
 https://github.com/taocpp/PEGTL.git
-
-**git clone --recurse-submodules** https://github.com/microsoft/cppgraphqlgen.git
+git clone --recurse-submodules https://github.com/microsoft/cppgraphqlgen.git
 
 ### Генерация схемы
-
 /usr/local/bin/cppgraphqlgen/schemagen  -s database/schema.graphql -p GQL -n database
+
+
+### implement stubs
+ServiceMock.h
+ServiceMock.cpp
 
 ### Полезные ссылки про GraphQL
 
+https://graphql.org/graphql-js/language/
 https://spec.graphql.org/October2021/
-
 https://www.howtographql.com/basics/0-introduction/
 
 ### Схема
-
 
 schema {
   query: Query

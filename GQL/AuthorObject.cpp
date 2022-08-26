@@ -107,7 +107,7 @@ service::AwaitableResolver Author::resolveTitle(service::ResolverParams&& params
 
 service::AwaitableResolver Author::resolve_typename(service::ResolverParams&& params) const
 {
-	return service::ModifiedResult<std::string>::convert(std::string{ R"gql(Author)gql" }, std::move(params));
+	return service::Result<std::string>::convert(std::string{ R"gql(Author)gql" }, std::move(params));
 }
 
 } // namespace object

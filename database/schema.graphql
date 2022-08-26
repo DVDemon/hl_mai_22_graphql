@@ -15,13 +15,3 @@ type Author  {
   email:String!
   title:String!
 }
-
-query {
-    search(term1:"A", term2:"B"){
-        id,
-        first_name,
-        last_name,
-        email,
-        title
-    }
-}
