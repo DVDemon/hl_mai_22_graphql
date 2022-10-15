@@ -1,5 +1,13 @@
 schema {
   query: Query
+  mutation: Mutations
+}
+
+type Mutations{
+  addAuthor(first_name: String!,
+            last_name: String!,
+            email: String!,
+            title: String!) : String!
 }
 
 type Query {

@@ -3,7 +3,9 @@
 
 #include "../GQL/GQLSchema.h"
 #include "../GQL/QueryObject.h"
+#include "../GQL/MutationsObject.h"
 #include "../GQL/AuthorObject.h"
+
 
 #include <atomic>
 #include <memory>
@@ -56,9 +58,18 @@ namespace graphql::database::object
     {
         void beginSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const;
         void endSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const;
-        std::shared_ptr<Author> getAuthor(std::optional<int> &&idArg) const;
-        std::vector<std::shared_ptr<Author>> getAllAuthors() const;
-        std::vector<std::shared_ptr<Author>> getSearch(std::string &&term1Arg, std::string &&term2Arg) const;
+        std::shared_ptr<Author> getAuthor(service::FieldParams&& params, std::optional<int> &&idArg) const;
+        std::optional<std::vector<std::shared_ptr<Author>>> getAllAuthors(service::FieldParams&& params) const;
+        std::vector<std::shared_ptr<Author>> getSearch(service::FieldParams&& params, std::string &&term1Arg, std::string &&term2Arg) const;
     };
+
+    struct MutationsImpl
+    {
+        void beginSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const;
+        void endSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const;
+        std::string applyAddAuthor(service::FieldParams&& params,
+                                   std::string &&first_nameArg, std::string &&last_nameArg, std::string &&emailArg, std::string &&titleArg) const;
+    };
+    
 
 }

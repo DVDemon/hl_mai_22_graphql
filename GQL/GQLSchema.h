@@ -23,6 +23,7 @@ namespace graphql {
 namespace database {
 namespace object {
 
+class Mutations;
 class Query;
 class Author;
 
@@ -32,20 +33,23 @@ class [[nodiscard]] Operations final
 	: public service::Request
 {
 public:
-	explicit Operations(std::shared_ptr<object::Query> query);
+	explicit Operations(std::shared_ptr<object::Query> query, std::shared_ptr<object::Mutations> mutation);
 
-	template <class TQuery>
-	explicit Operations(std::shared_ptr<TQuery> query)
+	template <class TQuery, class TMutations>
+	explicit Operations(std::shared_ptr<TQuery> query, std::shared_ptr<TMutations> mutation)
 		: Operations {
-			std::make_shared<object::Query>(std::move(query))
+			std::make_shared<object::Query>(std::move(query)),
+			std::make_shared<object::Mutations>(std::move(mutation))
 		}
 	{
 	}
 
 private:
 	std::shared_ptr<object::Query> _query;
+	std::shared_ptr<object::Mutations> _mutation;
 };
 
+void AddMutationsDetails(const std::shared_ptr<schema::ObjectType>& typeMutations, const std::shared_ptr<schema::Schema>& schema);
 void AddQueryDetails(const std::shared_ptr<schema::ObjectType>& typeQuery, const std::shared_ptr<schema::Schema>& schema);
 void AddAuthorDetails(const std::shared_ptr<schema::ObjectType>& typeAuthor, const std::shared_ptr<schema::Schema>& schema);
 

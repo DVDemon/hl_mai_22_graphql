@@ -15,7 +15,8 @@ namespace graphql::database::object
     std::shared_ptr<graphql::service::Request> GetService()
     {
         std::shared_ptr<Query> query = std::make_shared<Query>(std::make_shared<QueryImpl>());
-        auto service = std::make_shared<Operations>(std::move(query));
+        std::shared_ptr<Mutations> mutation = std::make_shared<Mutations>(std::make_shared<MutationsImpl>());
+        auto service = std::make_shared<Operations>(std::move(query),std::move(mutation));
         return service;
     }
 
@@ -26,7 +27,8 @@ namespace graphql::database::object
     {
     }
 
-    std::shared_ptr<Author> QueryImpl::getAuthor([[maybe_unused]] std::optional<int> &&idArg) const
+    std::shared_ptr<Author> QueryImpl::getAuthor([[maybe_unused]] service::FieldParams&& params, 
+                                                    [[maybe_unused]] std::optional<int> &&idArg) const
     {
 
         auto author_impl = std::make_shared<AuthorImpl>();
@@ -61,7 +63,7 @@ namespace graphql::database::object
         }
     }
 
-    std::vector<std::shared_ptr<Author>> QueryImpl::getAllAuthors() const
+    std::optional<std::vector<std::shared_ptr<Author>>> QueryImpl::getAllAuthors([[maybe_unused]] service::FieldParams&& params) const
     {
         try
         {
@@ -100,7 +102,8 @@ namespace graphql::database::object
         }
     }
 
-    std::vector<std::shared_ptr<Author>> QueryImpl::getSearch([[maybe_unused]] std::string &&term1Arg, [[maybe_unused]] std::string &&term2Arg) const
+    std::vector<std::shared_ptr<Author>> QueryImpl::getSearch([[maybe_unused]] service::FieldParams&& params,
+     [[maybe_unused]] std::string &&term1Arg, [[maybe_unused]] std::string &&term2Arg) const
     {
         try
         {
@@ -140,4 +143,61 @@ namespace graphql::database::object
         }
     }
 
+
+    void MutationsImpl::beginSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const{
+
+    }
+    void MutationsImpl::endSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const{
+
+    }
+    std::string MutationsImpl::applyAddAuthor([[maybe_unused]] service::FieldParams&& params, 
+                                              [[maybe_unused]] std::string && first_nameArg, 
+                                              [[maybe_unused]] std::string && last_nameArg, 
+                                              [[maybe_unused]] std::string && emailArg, 
+                                              [[maybe_unused]] std::string && titleArg) const{
+
+        try
+        {
+            Poco::Data::Session session = ::db::Database::get().create_session_write();
+            Poco::Data::Statement insert(session);
+            long _id;
+            insert << "INSERT INTO Author (first_name,last_name,email,title) VALUES(?, ?, ?, ?)",
+                use(first_nameArg),
+                use(last_nameArg),
+                use(emailArg),
+                use(titleArg);
+
+            insert.execute();
+
+
+            Poco::Data::Statement select(session);
+            select << "SELECT LAST_INSERT_ID()",
+                into(_id),
+                range(0, 1); //  iterate over result set one row at a time
+
+
+            if (!select.done())
+            {
+                select.execute();
+            }
+
+            return std::to_string(_id);
+        }
+        catch (Poco::Data::MySQL::ConnectionException &e)
+        {
+            std::cout << "connection:" << e.what() << std::endl;
+            throw;
+        }
+        catch (Poco::Data::MySQL::StatementException &e)
+        {
+
+            std::cout << "statement:" << e.what() << std::endl;
+            throw;
+        }
+        catch (Poco::Data::MySQL::MySQLException &e){
+            
+            std::cout << "other:" << e.message() << std::endl;
+            throw;
+        }
+    }
 }

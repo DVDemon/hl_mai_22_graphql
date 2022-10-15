@@ -32,6 +32,7 @@ add_executable(${EXAMPLE_BINARY} main.cpp
                                  config/config.cpp 
                                  database/database.cpp
                                  GQL/AuthorObject.cpp
+                                 GQL/MutationsObject.cpp
                                  GQL/GQLSchema.cpp
                                  GQL/QueryObject.cpp
                                  database/ServiceMock.cpp)

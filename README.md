@@ -43,20 +43,11 @@ type Author  {
   title:String!
 }
 
-query {
-    search(term1:"A", term2:"B"){
-        id,
-        first_name,
-        last_name,
-        email,
-        title
-    }
-}
 
 ### Примеры запросов
 
 query {
-    search(term1:"I%", term2:"I%"){
+    search(term1:"I", term2:"I"){
         id,
         first_name,
         last_name,
