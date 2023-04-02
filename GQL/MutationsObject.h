@@ -14,15 +14,15 @@ namespace graphql::database::object {
 namespace methods::MutationsHas {
 
 template <class TImpl>
-concept applyAddAuthorWithParams = requires (TImpl impl, service::FieldParams params, std::string first_nameArg, std::string last_nameArg, std::string emailArg, std::string titleArg)
+concept applyAdd_userWithParams = requires (TImpl impl, service::FieldParams params, std::string first_nameArg, std::string last_nameArg, std::string emailArg, std::string titleArg, std::string loginArg, std::string passwordArg)
 {
-	{ service::AwaitableScalar<std::string> { impl.applyAddAuthor(std::move(params), std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg)) } };
+	{ service::AwaitableScalar<std::string> { impl.applyAdd_user(std::move(params), std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg), std::move(loginArg), std::move(passwordArg)) } };
 };
 
 template <class TImpl>
-concept applyAddAuthor = requires (TImpl impl, std::string first_nameArg, std::string last_nameArg, std::string emailArg, std::string titleArg)
+concept applyAdd_user = requires (TImpl impl, std::string first_nameArg, std::string last_nameArg, std::string emailArg, std::string titleArg, std::string loginArg, std::string passwordArg)
 {
-	{ service::AwaitableScalar<std::string> { impl.applyAddAuthor(std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg)) } };
+	{ service::AwaitableScalar<std::string> { impl.applyAdd_user(std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg), std::move(loginArg), std::move(passwordArg)) } };
 };
 
 template <class TImpl>
@@ -43,7 +43,7 @@ class [[nodiscard]] Mutations final
 	: public service::Object
 {
 private:
-	[[nodiscard]] service::AwaitableResolver resolveAddAuthor(service::ResolverParams&& params) const;
+	[[nodiscard]] service::AwaitableResolver resolveAdd_user(service::ResolverParams&& params) const;
 
 	[[nodiscard]] service::AwaitableResolver resolve_typename(service::ResolverParams&& params) const;
 
@@ -54,7 +54,7 @@ private:
 		virtual void beginSelectionSet(const service::SelectionSetParams& params) const = 0;
 		virtual void endSelectionSet(const service::SelectionSetParams& params) const = 0;
 
-		[[nodiscard]] virtual service::AwaitableScalar<std::string> applyAddAuthor(service::FieldParams&& params, std::string&& first_nameArg, std::string&& last_nameArg, std::string&& emailArg, std::string&& titleArg) const = 0;
+		[[nodiscard]] virtual service::AwaitableScalar<std::string> applyAdd_user(service::FieldParams&& params, std::string&& first_nameArg, std::string&& last_nameArg, std::string&& emailArg, std::string&& titleArg, std::string&& loginArg, std::string&& passwordArg) const = 0;
 	};
 
 	template <class T>
@@ -66,16 +66,16 @@ private:
 		{
 		}
 
-		[[nodiscard]] service::AwaitableScalar<std::string> applyAddAuthor(service::FieldParams&& params, std::string&& first_nameArg, std::string&& last_nameArg, std::string&& emailArg, std::string&& titleArg) const final
+		[[nodiscard]] service::AwaitableScalar<std::string> applyAdd_user(service::FieldParams&& params, std::string&& first_nameArg, std::string&& last_nameArg, std::string&& emailArg, std::string&& titleArg, std::string&& loginArg, std::string&& passwordArg) const final
 		{
-			if constexpr (methods::MutationsHas::applyAddAuthorWithParams<T>)
+			if constexpr (methods::MutationsHas::applyAdd_userWithParams<T>)
 			{
-				return { _pimpl->applyAddAuthor(std::move(params), std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg)) };
+				return { _pimpl->applyAdd_user(std::move(params), std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg), std::move(loginArg), std::move(passwordArg)) };
 			}
 			else
 			{
-				static_assert(methods::MutationsHas::applyAddAuthor<T>, R"msg(Mutations::applyAddAuthor is not implemented)msg");
-				return { _pimpl->applyAddAuthor(std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg)) };
+				static_assert(methods::MutationsHas::applyAdd_user<T>, R"msg(Mutations::applyAdd_user is not implemented)msg");
+				return { _pimpl->applyAdd_user(std::move(first_nameArg), std::move(last_nameArg), std::move(emailArg), std::move(titleArg), std::move(loginArg), std::move(passwordArg)) };
 			}
 		}
 

@@ -27,21 +27,23 @@ namespace graphql::database::object
     {
     }
 
-    std::shared_ptr<Author> QueryImpl::getAuthor([[maybe_unused]] service::FieldParams&& params, 
+    std::shared_ptr<User> QueryImpl::getGet_user([[maybe_unused]] service::FieldParams&& params, 
                                                     [[maybe_unused]] std::optional<int> &&idArg) const
     {
-        std::cout << "get_author" << std::endl;
-        auto author_impl = std::make_shared<AuthorImpl>();
+        std::cout << "user" << std::endl;
+        auto user_impl = std::make_shared<UserImpl>();
         try
         {
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
-            select << "SELECT id, first_name, last_name, email, title FROM Author where id=?",
-                into(author_impl->_id),
-                into(author_impl->_first_name),
-                into(author_impl->_last_name),
-                into(author_impl->_email),
-                into(author_impl->_title),
+            select << "SELECT id, first_name, last_name, email, title, login, password FROM User where id=?",
+                into(user_impl->_id),
+                into(user_impl->_first_name),
+                into(user_impl->_last_name),
+                into(user_impl->_email),
+                into(user_impl->_title),
+                into(user_impl->_login),
+                into(user_impl->_password),
                 use(idArg.value()),
                 range(0, 1); //  iterate over result set one row at a time
 
@@ -50,7 +52,7 @@ namespace graphql::database::object
                 if (!select.execute())
                     throw std::logic_error("Record not found");
             }
-            return std::make_shared<Author>(author_impl);
+            return std::make_shared<User>(user_impl);
         }
 
         catch (Poco::Data::MySQL::ConnectionException &e)
@@ -63,7 +65,7 @@ namespace graphql::database::object
         }
     }
 
-    std::optional<std::vector<std::shared_ptr<Author>>> QueryImpl::getAllAuthors([[maybe_unused]] service::FieldParams&& params) const
+    std::optional<std::vector<std::shared_ptr<User>>> QueryImpl::getAll_users([[maybe_unused]] service::FieldParams&& params) const
     {
         try
         {
@@ -71,23 +73,25 @@ namespace graphql::database::object
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
 
-            std::vector<std::shared_ptr<Author>> result;
-            auto author_impl = std::make_shared<AuthorImpl>();
-            select << "SELECT id, first_name, last_name, email, title FROM Author",
-                into(author_impl->_id),
-                into(author_impl->_first_name),
-                into(author_impl->_last_name),
-                into(author_impl->_email),
-                into(author_impl->_title),
+            std::vector<std::shared_ptr<User>> result;
+            auto user_impl = std::make_shared<UserImpl>();
+            select << "SELECT id, first_name, last_name, email, title,login, password FROM User",
+                into(user_impl->_id),
+                into(user_impl->_first_name),
+                into(user_impl->_last_name),
+                into(user_impl->_email),
+                into(user_impl->_title),
+                into(user_impl->_login),
+                into(user_impl->_password),
                 range(0, 1); //  iterate over result set one row at a time
 
             while (!select.done())
             {
                 if (select.execute())
                 {
-                    auto a = std::make_shared<AuthorImpl>();
-                    *a = *author_impl;
-                    result.push_back(std::make_shared<Author>(a));
+                    auto a = std::make_shared<UserImpl>();
+                    *a = *user_impl;
+                    result.push_back(std::make_shared<User>(a));
                 }
             }
             return result;
@@ -102,7 +106,7 @@ namespace graphql::database::object
         }
     }
 
-    std::vector<std::shared_ptr<Author>> QueryImpl::getSearch([[maybe_unused]] service::FieldParams&& params,
+    std::vector<std::shared_ptr<User>> QueryImpl::getSearch([[maybe_unused]] service::FieldParams&& params,
      [[maybe_unused]] std::string &&term1Arg, [[maybe_unused]] std::string &&term2Arg) const
     {
         try
@@ -111,25 +115,27 @@ namespace graphql::database::object
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
 
-            std::vector<std::shared_ptr<Author>> result;
-            auto author_impl = std::make_shared<AuthorImpl>();
-            select << "SELECT id, first_name, last_name, email, title FROM Author WHERE first_name LIKE ? AND last_name LIKE ?",
-                into(author_impl->_id),
-                into(author_impl->_first_name),
-                into(author_impl->_last_name),
-                into(author_impl->_email),
-                into(author_impl->_title),
+            std::vector<std::shared_ptr<User>> result;
+            auto user_impl = std::make_shared<UserImpl>();
+            select << "SELECT id, first_name, last_name, email, title, login, password FROM User WHERE first_name LIKE ? AND last_name LIKE ?",
+                into(user_impl->_id),
+                into(user_impl->_first_name),
+                into(user_impl->_last_name),
+                into(user_impl->_email),
+                into(user_impl->_title),
+                into(user_impl->_login),
+                into(user_impl->_password),
                 use(term1Arg),
                 use(term2Arg),
                 range(0, 1); //  iterate over result set one row at a time
-
+            std::cout << select.toString() << std::endl;
             while (!select.done())
             {
                 if (select.execute())
                 {
-                    auto a = std::make_shared<AuthorImpl>();
-                    *a = *author_impl;
-                    result.push_back(std::make_shared<Author>(a));
+                    auto a = std::make_shared<UserImpl>();
+                    *a = *user_impl;
+                    result.push_back(std::make_shared<User>(a));
                 }
             }
             return result;
@@ -151,11 +157,13 @@ namespace graphql::database::object
     void MutationsImpl::endSelectionSet([[maybe_unused]] const service::SelectionSetParams &params) const{
 
     }
-    std::string MutationsImpl::applyAddAuthor([[maybe_unused]] service::FieldParams&& params, 
+    std::string MutationsImpl::applyAdd_user([[maybe_unused]] service::FieldParams&& params, 
                                               [[maybe_unused]] std::string && first_nameArg, 
                                               [[maybe_unused]] std::string && last_nameArg, 
                                               [[maybe_unused]] std::string && emailArg, 
-                                              [[maybe_unused]] std::string && titleArg) const{
+                                              [[maybe_unused]] std::string && titleArg, 
+                                              [[maybe_unused]] std::string && loginArg, 
+                                              [[maybe_unused]] std::string && passwordArg) const{
 
         try
         {
@@ -163,12 +171,14 @@ namespace graphql::database::object
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement insert(session);
             long _id;
-            insert << "INSERT INTO Author (first_name,last_name,email,title) VALUES(?, ?, ?, ?)",
+            insert << "INSERT INTO User (first_name,last_name,email,title,login,password) VALUES(?, ?, ?, ?,?,?)",
                 use(first_nameArg),
                 use(last_nameArg),
                 use(emailArg),
-                use(titleArg);
-
+                use(titleArg),
+                use(loginArg),
+                use(passwordArg);
+            std::cout << insert.toString() << std::endl;
             insert.execute();
 
 

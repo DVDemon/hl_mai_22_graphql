@@ -39,13 +39,49 @@ using Poco::Util::ServerApplication;
 
 #include "http_request_factory.h"
 #include "../config/config.h"
+#include "../database/database.h"
+#include <Poco/Data/MySQL/Connector.h>
+#include <Poco/Data/MySQL/MySQLException.h>
+#include <Poco/Data/SessionFactory.h>
+using namespace Poco::Data::Keywords;
 
 class HTTPWebServer : public Poco::Util::ServerApplication
 {
 protected:
+    void init()
+    {
+        try
+        {
+
+            Poco::Data::Session session = db::Database::get().create_session();
+            Poco::Data::Statement create_stmt(session);
+            create_stmt << "CREATE TABLE IF NOT EXISTS `User` (`id` INT NOT NULL AUTO_INCREMENT,"
+                        << "`first_name` VARCHAR(256) NOT NULL,"
+                        << "`last_name` VARCHAR(256) NOT NULL,"
+                        << "`login` VARCHAR(256) NOT NULL,"
+                        << "`password` VARCHAR(256) NOT NULL,"
+                        << "`email` VARCHAR(256) NULL,"
+                        << "`title` VARCHAR(1024) NULL,"
+                        << "PRIMARY KEY (`id`),KEY `fn` (`first_name`),KEY `ln` (`last_name`));",
+                now;
+        }
+
+        catch (Poco::Data::MySQL::ConnectionException &e)
+        {
+            std::cout << "connection:" << e.what() << std::endl;
+            throw;
+        }
+        catch (Poco::Data::MySQL::StatementException &e)
+        {
+
+            std::cout << "statement:" << e.what() << std::endl;
+            throw;
+        }
+    }
+
     int main([[maybe_unused]] const std::vector<std::string> &args)
     {
-        
+        init();
         std::string format(
             config().getString("HTTPWebServer.format",
                                DateTimeFormat::SORTABLE_FORMAT));

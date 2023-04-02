@@ -4,22 +4,26 @@ schema {
 }
 
 type Mutations{
-  addAuthor(first_name: String!,
+  add_user(first_name: String!,
             last_name: String!,
             email: String!,
-            title: String!) : String!
+            title: String!,
+            login: String!,
+            password: String!) : String!
 }
 
 type Query {
-  author(id: Int): Author
-  allAuthors: [Author]
-  search(term1: String!,term2: String!): [Author!]!
+  get_user(id: Int): User
+  all_users: [User]
+  search(term1: String!,term2: String!): [User!]!
 }
 
-type Author  {
+type User  {
   id: Int
   first_name:String!
   last_name:String!
   email:String!
   title:String!
+  login:String!
+  password:String!
 }

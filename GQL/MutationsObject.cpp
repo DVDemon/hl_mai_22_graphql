@@ -36,7 +36,7 @@ service::TypeNames Mutations::getTypeNames() const noexcept
 service::ResolverMap Mutations::getResolvers() const noexcept
 {
 	return {
-		{ R"gql(addAuthor)gql"sv, [this](service::ResolverParams&& params) { return resolveAddAuthor(std::move(params)); } },
+		{ R"gql(add_user)gql"sv, [this](service::ResolverParams&& params) { return resolveAdd_user(std::move(params)); } },
 		{ R"gql(__typename)gql"sv, [this](service::ResolverParams&& params) { return resolve_typename(std::move(params)); } }
 	};
 }
@@ -51,15 +51,17 @@ void Mutations::endSelectionSet(const service::SelectionSetParams& params) const
 	_pimpl->endSelectionSet(params);
 }
 
-service::AwaitableResolver Mutations::resolveAddAuthor(service::ResolverParams&& params) const
+service::AwaitableResolver Mutations::resolveAdd_user(service::ResolverParams&& params) const
 {
 	auto argFirst_name = service::ModifiedArgument<std::string>::require("first_name", params.arguments);
 	auto argLast_name = service::ModifiedArgument<std::string>::require("last_name", params.arguments);
 	auto argEmail = service::ModifiedArgument<std::string>::require("email", params.arguments);
 	auto argTitle = service::ModifiedArgument<std::string>::require("title", params.arguments);
+	auto argLogin = service::ModifiedArgument<std::string>::require("login", params.arguments);
+	auto argPassword = service::ModifiedArgument<std::string>::require("password", params.arguments);
 	std::unique_lock resolverLock(_resolverMutex);
 	auto directives = std::move(params.fieldDirectives);
-	auto result = _pimpl->applyAddAuthor(service::FieldParams(service::SelectionSetParams{ params }, std::move(directives)), std::move(argFirst_name), std::move(argLast_name), std::move(argEmail), std::move(argTitle));
+	auto result = _pimpl->applyAdd_user(service::FieldParams(service::SelectionSetParams{ params }, std::move(directives)), std::move(argFirst_name), std::move(argLast_name), std::move(argEmail), std::move(argTitle), std::move(argLogin), std::move(argPassword));
 	resolverLock.unlock();
 
 	return service::ModifiedResult<std::string>::convert(std::move(result), std::move(params));
@@ -75,11 +77,13 @@ service::AwaitableResolver Mutations::resolve_typename(service::ResolverParams&&
 void AddMutationsDetails(const std::shared_ptr<schema::ObjectType>& typeMutations, const std::shared_ptr<schema::Schema>& schema)
 {
 	typeMutations->AddFields({
-		schema::Field::Make(R"gql(addAuthor)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), {
+		schema::Field::Make(R"gql(add_user)gql"sv, R"md()md"sv, std::nullopt, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), {
 			schema::InputValue::Make(R"gql(first_name)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
 			schema::InputValue::Make(R"gql(last_name)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
 			schema::InputValue::Make(R"gql(email)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
-			schema::InputValue::Make(R"gql(title)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
+			schema::InputValue::Make(R"gql(title)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(login)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv),
+			schema::InputValue::Make(R"gql(password)gql"sv, R"md()md"sv, schema->WrapType(introspection::TypeKind::NON_NULL, schema->LookupType(R"gql(String)gql"sv)), R"gql()gql"sv)
 		})
 	});
 }

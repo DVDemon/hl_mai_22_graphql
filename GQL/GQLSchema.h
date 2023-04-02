@@ -25,7 +25,7 @@ namespace object {
 
 class Mutations;
 class Query;
-class Author;
+class User;
 
 } // namespace object
 
@@ -51,7 +51,7 @@ private:
 
 void AddMutationsDetails(const std::shared_ptr<schema::ObjectType>& typeMutations, const std::shared_ptr<schema::Schema>& schema);
 void AddQueryDetails(const std::shared_ptr<schema::ObjectType>& typeQuery, const std::shared_ptr<schema::Schema>& schema);
-void AddAuthorDetails(const std::shared_ptr<schema::ObjectType>& typeAuthor, const std::shared_ptr<schema::Schema>& schema);
+void AddUserDetails(const std::shared_ptr<schema::ObjectType>& typeUser, const std::shared_ptr<schema::Schema>& schema);
 
 std::shared_ptr<schema::Schema> GetSchema();
 

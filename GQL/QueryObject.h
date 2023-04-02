@@ -14,39 +14,39 @@ namespace graphql::database::object {
 namespace methods::QueryHas {
 
 template <class TImpl>
-concept getAuthorWithParams = requires (TImpl impl, service::FieldParams params, std::optional<int> idArg)
+concept getGet_userWithParams = requires (TImpl impl, service::FieldParams params, std::optional<int> idArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<Author>> { impl.getAuthor(std::move(params), std::move(idArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getGet_user(std::move(params), std::move(idArg)) } };
 };
 
 template <class TImpl>
-concept getAuthor = requires (TImpl impl, std::optional<int> idArg)
+concept getGet_user = requires (TImpl impl, std::optional<int> idArg)
 {
-	{ service::AwaitableObject<std::shared_ptr<Author>> { impl.getAuthor(std::move(idArg)) } };
+	{ service::AwaitableObject<std::shared_ptr<User>> { impl.getGet_user(std::move(idArg)) } };
 };
 
 template <class TImpl>
-concept getAllAuthorsWithParams = requires (TImpl impl, service::FieldParams params)
+concept getAll_usersWithParams = requires (TImpl impl, service::FieldParams params)
 {
-	{ service::AwaitableObject<std::optional<std::vector<std::shared_ptr<Author>>>> { impl.getAllAuthors(std::move(params)) } };
+	{ service::AwaitableObject<std::optional<std::vector<std::shared_ptr<User>>>> { impl.getAll_users(std::move(params)) } };
 };
 
 template <class TImpl>
-concept getAllAuthors = requires (TImpl impl)
+concept getAll_users = requires (TImpl impl)
 {
-	{ service::AwaitableObject<std::optional<std::vector<std::shared_ptr<Author>>>> { impl.getAllAuthors() } };
+	{ service::AwaitableObject<std::optional<std::vector<std::shared_ptr<User>>>> { impl.getAll_users() } };
 };
 
 template <class TImpl>
 concept getSearchWithParams = requires (TImpl impl, service::FieldParams params, std::string term1Arg, std::string term2Arg)
 {
-	{ service::AwaitableObject<std::vector<std::shared_ptr<Author>>> { impl.getSearch(std::move(params), std::move(term1Arg), std::move(term2Arg)) } };
+	{ service::AwaitableObject<std::vector<std::shared_ptr<User>>> { impl.getSearch(std::move(params), std::move(term1Arg), std::move(term2Arg)) } };
 };
 
 template <class TImpl>
 concept getSearch = requires (TImpl impl, std::string term1Arg, std::string term2Arg)
 {
-	{ service::AwaitableObject<std::vector<std::shared_ptr<Author>>> { impl.getSearch(std::move(term1Arg), std::move(term2Arg)) } };
+	{ service::AwaitableObject<std::vector<std::shared_ptr<User>>> { impl.getSearch(std::move(term1Arg), std::move(term2Arg)) } };
 };
 
 template <class TImpl>
@@ -67,8 +67,8 @@ class [[nodiscard]] Query final
 	: public service::Object
 {
 private:
-	[[nodiscard]] service::AwaitableResolver resolveAuthor(service::ResolverParams&& params) const;
-	[[nodiscard]] service::AwaitableResolver resolveAllAuthors(service::ResolverParams&& params) const;
+	[[nodiscard]] service::AwaitableResolver resolveGet_user(service::ResolverParams&& params) const;
+	[[nodiscard]] service::AwaitableResolver resolveAll_users(service::ResolverParams&& params) const;
 	[[nodiscard]] service::AwaitableResolver resolveSearch(service::ResolverParams&& params) const;
 
 	[[nodiscard]] service::AwaitableResolver resolve_typename(service::ResolverParams&& params) const;
@@ -84,9 +84,9 @@ private:
 		virtual void beginSelectionSet(const service::SelectionSetParams& params) const = 0;
 		virtual void endSelectionSet(const service::SelectionSetParams& params) const = 0;
 
-		[[nodiscard]] virtual service::AwaitableObject<std::shared_ptr<Author>> getAuthor(service::FieldParams&& params, std::optional<int>&& idArg) const = 0;
-		[[nodiscard]] virtual service::AwaitableObject<std::optional<std::vector<std::shared_ptr<Author>>>> getAllAuthors(service::FieldParams&& params) const = 0;
-		[[nodiscard]] virtual service::AwaitableObject<std::vector<std::shared_ptr<Author>>> getSearch(service::FieldParams&& params, std::string&& term1Arg, std::string&& term2Arg) const = 0;
+		[[nodiscard]] virtual service::AwaitableObject<std::shared_ptr<User>> getGet_user(service::FieldParams&& params, std::optional<int>&& idArg) const = 0;
+		[[nodiscard]] virtual service::AwaitableObject<std::optional<std::vector<std::shared_ptr<User>>>> getAll_users(service::FieldParams&& params) const = 0;
+		[[nodiscard]] virtual service::AwaitableObject<std::vector<std::shared_ptr<User>>> getSearch(service::FieldParams&& params, std::string&& term1Arg, std::string&& term2Arg) const = 0;
 	};
 
 	template <class T>
@@ -98,33 +98,33 @@ private:
 		{
 		}
 
-		[[nodiscard]] service::AwaitableObject<std::shared_ptr<Author>> getAuthor(service::FieldParams&& params, std::optional<int>&& idArg) const final
+		[[nodiscard]] service::AwaitableObject<std::shared_ptr<User>> getGet_user(service::FieldParams&& params, std::optional<int>&& idArg) const final
 		{
-			if constexpr (methods::QueryHas::getAuthorWithParams<T>)
+			if constexpr (methods::QueryHas::getGet_userWithParams<T>)
 			{
-				return { _pimpl->getAuthor(std::move(params), std::move(idArg)) };
+				return { _pimpl->getGet_user(std::move(params), std::move(idArg)) };
 			}
 			else
 			{
-				static_assert(methods::QueryHas::getAuthor<T>, R"msg(Query::getAuthor is not implemented)msg");
-				return { _pimpl->getAuthor(std::move(idArg)) };
+				static_assert(methods::QueryHas::getGet_user<T>, R"msg(Query::getGet_user is not implemented)msg");
+				return { _pimpl->getGet_user(std::move(idArg)) };
 			}
 		}
 
-		[[nodiscard]] service::AwaitableObject<std::optional<std::vector<std::shared_ptr<Author>>>> getAllAuthors(service::FieldParams&& params) const final
+		[[nodiscard]] service::AwaitableObject<std::optional<std::vector<std::shared_ptr<User>>>> getAll_users(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::QueryHas::getAllAuthorsWithParams<T>)
+			if constexpr (methods::QueryHas::getAll_usersWithParams<T>)
 			{
-				return { _pimpl->getAllAuthors(std::move(params)) };
+				return { _pimpl->getAll_users(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::QueryHas::getAllAuthors<T>, R"msg(Query::getAllAuthors is not implemented)msg");
-				return { _pimpl->getAllAuthors() };
+				static_assert(methods::QueryHas::getAll_users<T>, R"msg(Query::getAll_users is not implemented)msg");
+				return { _pimpl->getAll_users() };
 			}
 		}
 
-		[[nodiscard]] service::AwaitableObject<std::vector<std::shared_ptr<Author>>> getSearch(service::FieldParams&& params, std::string&& term1Arg, std::string&& term2Arg) const final
+		[[nodiscard]] service::AwaitableObject<std::vector<std::shared_ptr<User>>> getSearch(service::FieldParams&& params, std::string&& term1Arg, std::string&& term2Arg) const final
 		{
 			if constexpr (methods::QueryHas::getSearchWithParams<T>)
 			{

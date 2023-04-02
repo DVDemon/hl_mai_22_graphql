@@ -40,12 +40,12 @@ void AddTypesToSchema(const std::shared_ptr<schema::Schema>& schema)
 	schema->AddType(R"gql(Mutations)gql"sv, typeMutations);
 	auto typeQuery = schema::ObjectType::Make(R"gql(Query)gql"sv, R"md()md"sv);
 	schema->AddType(R"gql(Query)gql"sv, typeQuery);
-	auto typeAuthor = schema::ObjectType::Make(R"gql(Author)gql"sv, R"md()md"sv);
-	schema->AddType(R"gql(Author)gql"sv, typeAuthor);
+	auto typeUser = schema::ObjectType::Make(R"gql(User)gql"sv, R"md()md"sv);
+	schema->AddType(R"gql(User)gql"sv, typeUser);
 
 	AddMutationsDetails(typeMutations, schema);
 	AddQueryDetails(typeQuery, schema);
-	AddAuthorDetails(typeAuthor, schema);
+	AddUserDetails(typeUser, schema);
 
 	schema->AddQueryType(typeQuery);
 	schema->AddMutationType(typeMutations);

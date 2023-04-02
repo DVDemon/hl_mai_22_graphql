@@ -5,13 +5,13 @@
 
 #pragma once
 
-#ifndef AUTHOROBJECT_H
-#define AUTHOROBJECT_H
+#ifndef USEROBJECT_H
+#define USEROBJECT_H
 
 #include "GQLSchema.h"
 
 namespace graphql::database::object {
-namespace methods::AuthorHas {
+namespace methods::UserHas {
 
 template <class TImpl>
 concept getIdWithParams = requires (TImpl impl, service::FieldParams params)
@@ -74,6 +74,30 @@ concept getTitle = requires (TImpl impl)
 };
 
 template <class TImpl>
+concept getLoginWithParams = requires (TImpl impl, service::FieldParams params)
+{
+	{ service::AwaitableScalar<std::string> { impl.getLogin(std::move(params)) } };
+};
+
+template <class TImpl>
+concept getLogin = requires (TImpl impl)
+{
+	{ service::AwaitableScalar<std::string> { impl.getLogin() } };
+};
+
+template <class TImpl>
+concept getPasswordWithParams = requires (TImpl impl, service::FieldParams params)
+{
+	{ service::AwaitableScalar<std::string> { impl.getPassword(std::move(params)) } };
+};
+
+template <class TImpl>
+concept getPassword = requires (TImpl impl)
+{
+	{ service::AwaitableScalar<std::string> { impl.getPassword() } };
+};
+
+template <class TImpl>
 concept beginSelectionSet = requires (TImpl impl, const service::SelectionSetParams params)
 {
 	{ impl.beginSelectionSet(params) };
@@ -85,9 +109,9 @@ concept endSelectionSet = requires (TImpl impl, const service::SelectionSetParam
 	{ impl.endSelectionSet(params) };
 };
 
-} // namespace methods::AuthorHas
+} // namespace methods::UserHas
 
-class [[nodiscard]] Author final
+class [[nodiscard]] User final
 	: public service::Object
 {
 private:
@@ -96,6 +120,8 @@ private:
 	[[nodiscard]] service::AwaitableResolver resolveLast_name(service::ResolverParams&& params) const;
 	[[nodiscard]] service::AwaitableResolver resolveEmail(service::ResolverParams&& params) const;
 	[[nodiscard]] service::AwaitableResolver resolveTitle(service::ResolverParams&& params) const;
+	[[nodiscard]] service::AwaitableResolver resolveLogin(service::ResolverParams&& params) const;
+	[[nodiscard]] service::AwaitableResolver resolvePassword(service::ResolverParams&& params) const;
 
 	[[nodiscard]] service::AwaitableResolver resolve_typename(service::ResolverParams&& params) const;
 
@@ -111,6 +137,8 @@ private:
 		[[nodiscard]] virtual service::AwaitableScalar<std::string> getLast_name(service::FieldParams&& params) const = 0;
 		[[nodiscard]] virtual service::AwaitableScalar<std::string> getEmail(service::FieldParams&& params) const = 0;
 		[[nodiscard]] virtual service::AwaitableScalar<std::string> getTitle(service::FieldParams&& params) const = 0;
+		[[nodiscard]] virtual service::AwaitableScalar<std::string> getLogin(service::FieldParams&& params) const = 0;
+		[[nodiscard]] virtual service::AwaitableScalar<std::string> getPassword(service::FieldParams&& params) const = 0;
 	};
 
 	template <class T>
@@ -124,72 +152,98 @@ private:
 
 		[[nodiscard]] service::AwaitableScalar<std::optional<int>> getId(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::AuthorHas::getIdWithParams<T>)
+			if constexpr (methods::UserHas::getIdWithParams<T>)
 			{
 				return { _pimpl->getId(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::AuthorHas::getId<T>, R"msg(Author::getId is not implemented)msg");
+				static_assert(methods::UserHas::getId<T>, R"msg(User::getId is not implemented)msg");
 				return { _pimpl->getId() };
 			}
 		}
 
 		[[nodiscard]] service::AwaitableScalar<std::string> getFirst_name(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::AuthorHas::getFirst_nameWithParams<T>)
+			if constexpr (methods::UserHas::getFirst_nameWithParams<T>)
 			{
 				return { _pimpl->getFirst_name(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::AuthorHas::getFirst_name<T>, R"msg(Author::getFirst_name is not implemented)msg");
+				static_assert(methods::UserHas::getFirst_name<T>, R"msg(User::getFirst_name is not implemented)msg");
 				return { _pimpl->getFirst_name() };
 			}
 		}
 
 		[[nodiscard]] service::AwaitableScalar<std::string> getLast_name(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::AuthorHas::getLast_nameWithParams<T>)
+			if constexpr (methods::UserHas::getLast_nameWithParams<T>)
 			{
 				return { _pimpl->getLast_name(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::AuthorHas::getLast_name<T>, R"msg(Author::getLast_name is not implemented)msg");
+				static_assert(methods::UserHas::getLast_name<T>, R"msg(User::getLast_name is not implemented)msg");
 				return { _pimpl->getLast_name() };
 			}
 		}
 
 		[[nodiscard]] service::AwaitableScalar<std::string> getEmail(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::AuthorHas::getEmailWithParams<T>)
+			if constexpr (methods::UserHas::getEmailWithParams<T>)
 			{
 				return { _pimpl->getEmail(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::AuthorHas::getEmail<T>, R"msg(Author::getEmail is not implemented)msg");
+				static_assert(methods::UserHas::getEmail<T>, R"msg(User::getEmail is not implemented)msg");
 				return { _pimpl->getEmail() };
 			}
 		}
 
 		[[nodiscard]] service::AwaitableScalar<std::string> getTitle(service::FieldParams&& params) const final
 		{
-			if constexpr (methods::AuthorHas::getTitleWithParams<T>)
+			if constexpr (methods::UserHas::getTitleWithParams<T>)
 			{
 				return { _pimpl->getTitle(std::move(params)) };
 			}
 			else
 			{
-				static_assert(methods::AuthorHas::getTitle<T>, R"msg(Author::getTitle is not implemented)msg");
+				static_assert(methods::UserHas::getTitle<T>, R"msg(User::getTitle is not implemented)msg");
 				return { _pimpl->getTitle() };
+			}
+		}
+
+		[[nodiscard]] service::AwaitableScalar<std::string> getLogin(service::FieldParams&& params) const final
+		{
+			if constexpr (methods::UserHas::getLoginWithParams<T>)
+			{
+				return { _pimpl->getLogin(std::move(params)) };
+			}
+			else
+			{
+				static_assert(methods::UserHas::getLogin<T>, R"msg(User::getLogin is not implemented)msg");
+				return { _pimpl->getLogin() };
+			}
+		}
+
+		[[nodiscard]] service::AwaitableScalar<std::string> getPassword(service::FieldParams&& params) const final
+		{
+			if constexpr (methods::UserHas::getPasswordWithParams<T>)
+			{
+				return { _pimpl->getPassword(std::move(params)) };
+			}
+			else
+			{
+				static_assert(methods::UserHas::getPassword<T>, R"msg(User::getPassword is not implemented)msg");
+				return { _pimpl->getPassword() };
 			}
 		}
 
 		void beginSelectionSet(const service::SelectionSetParams& params) const final
 		{
-			if constexpr (methods::AuthorHas::beginSelectionSet<T>)
+			if constexpr (methods::UserHas::beginSelectionSet<T>)
 			{
 				_pimpl->beginSelectionSet(params);
 			}
@@ -197,7 +251,7 @@ private:
 
 		void endSelectionSet(const service::SelectionSetParams& params) const final
 		{
-			if constexpr (methods::AuthorHas::endSelectionSet<T>)
+			if constexpr (methods::UserHas::endSelectionSet<T>)
 			{
 				_pimpl->endSelectionSet(params);
 			}
@@ -207,7 +261,7 @@ private:
 		const std::shared_ptr<T> _pimpl;
 	};
 
-	Author(std::unique_ptr<const Concept>&& pimpl) noexcept;
+	User(std::unique_ptr<const Concept>&& pimpl) noexcept;
 
 	[[nodiscard]] service::TypeNames getTypeNames() const noexcept;
 	[[nodiscard]] service::ResolverMap getResolvers() const noexcept;
@@ -219,17 +273,17 @@ private:
 
 public:
 	template <class T>
-	Author(std::shared_ptr<T> pimpl) noexcept
-		: Author { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
+	User(std::shared_ptr<T> pimpl) noexcept
+		: User { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
 	{
 	}
 
 	[[nodiscard]] static constexpr std::string_view getObjectType() noexcept
 	{
-		return { R"gql(Author)gql" };
+		return { R"gql(User)gql" };
 	}
 };
 
 } // namespace graphql::database::object
 
-#endif // AUTHOROBJECT_H
+#endif // USEROBJECT_H
