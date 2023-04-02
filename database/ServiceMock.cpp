@@ -30,11 +30,11 @@ namespace graphql::database::object
     std::shared_ptr<Author> QueryImpl::getAuthor([[maybe_unused]] service::FieldParams&& params, 
                                                     [[maybe_unused]] std::optional<int> &&idArg) const
     {
-
+        std::cout << "get_author" << std::endl;
         auto author_impl = std::make_shared<AuthorImpl>();
         try
         {
-            Poco::Data::Session session = ::db::Database::get().create_session_read();
+            Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
             select << "SELECT id, first_name, last_name, email, title FROM Author where id=?",
                 into(author_impl->_id),
@@ -68,7 +68,7 @@ namespace graphql::database::object
         try
         {
             std::cout << "getAll" << std::endl;
-            Poco::Data::Session session = ::db::Database::get().create_session_read();
+            Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
 
             std::vector<std::shared_ptr<Author>> result;
@@ -107,7 +107,8 @@ namespace graphql::database::object
     {
         try
         {
-            Poco::Data::Session session = ::db::Database::get().create_session_read();
+            std::cout << "search" << std::endl;
+            Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
 
             std::vector<std::shared_ptr<Author>> result;
@@ -158,7 +159,8 @@ namespace graphql::database::object
 
         try
         {
-            Poco::Data::Session session = ::db::Database::get().create_session_write();
+            std::cout << "mutation" << std::endl; 
+            Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement insert(session);
             long _id;
             insert << "INSERT INTO Author (first_name,last_name,email,title) VALUES(?, ?, ?, ?)",

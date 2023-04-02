@@ -3,26 +3,21 @@
 
 namespace db{
     Database::Database(){
-        _connection_string_read+="host=";
-        _connection_string_read+=Config::get().get_read_request_ip();
-        _connection_string_read+=";user=";
-        _connection_string_read+=Config::get().get_login();
-        _connection_string_read+=";db=";
-        _connection_string_read+=Config::get().get_database();
-        _connection_string_read+=";password=";
-        _connection_string_read+=Config::get().get_password();
+        std::cout << "init database ..." << std::endl;
+        _connection_string+="host=";
+        _connection_string+=Config::get().get_host();
+        _connection_string+=";user=";
+        _connection_string+=Config::get().get_login();
+        _connection_string+=";db=";
+        _connection_string+=Config::get().get_database();
+        _connection_string+=";port=";
+        _connection_string+=Config::get().get_port();
+        _connection_string+=";password=";
+        _connection_string+=Config::get().get_password();
 
-
-        _connection_string_write+="host=";
-        _connection_string_write+=Config::get().get_write_request_ip();
-        _connection_string_write+=";user=";
-        _connection_string_write+=Config::get().get_login();
-        _connection_string_write+=";db=";
-        _connection_string_write+=Config::get().get_database();
-        _connection_string_write+=";password=";
-        _connection_string_write+=Config::get().get_password();
-
-        Poco::Data::MySQL::Connector::registerConnector();
+        std::cout << "Connection string:" << _connection_string << std::endl;
+         Poco::Data::MySQL::Connector::registerConnector();
+        _pool = std::make_unique<Poco::Data::SessionPool>(Poco::Data::MySQL::Connector::KEY, _connection_string);
     }
 
     Database& Database::get(){
@@ -30,11 +25,8 @@ namespace db{
         return _instance;
     }
 
-    Poco::Data::Session Database::create_session_read(){
-        return Poco::Data::Session(Poco::Data::SessionFactory::instance().create(Poco::Data::MySQL::Connector::KEY, _connection_string_read ));
+    Poco::Data::Session Database::create_session(){
+        return Poco::Data::Session(_pool->get());
     }
 
-    Poco::Data::Session Database::create_session_write(){
-        return Poco::Data::Session(Poco::Data::SessionFactory::instance().create(Poco::Data::MySQL::Connector::KEY, _connection_string_write ));
-    }
 }

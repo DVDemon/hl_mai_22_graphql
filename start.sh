@@ -1,1 +1,7 @@
-sudo ./build/hl_graphql --read=127.0.0.1 --write=127.0.0.1 --port=3306 --login=stud --password=stud --database=stud 
+export DB_HOST=127.0.0.1
+export DB_PORT=3360
+export DB_LOGIN=stud
+export DB_PASSWORD=stud
+export DB_DATABASE=archdb
+
+./build/hl_graphql
