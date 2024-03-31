@@ -1,8 +1,8 @@
 #include "ServiceMock.h"
 #include <iostream>
 #include "database.h"
-#include <Poco/Data/MySQL/Connector.h>
-#include <Poco/Data/MySQL/MySQLException.h>
+#include <Poco/Data/SessionFactory.h>
+#include <Poco/Data/RecordSet.h>
 #include <Poco/Data/SessionFactory.h>
 #include <Poco/JSON/Parser.h>
 #include <Poco/Dynamic/Var.h>
@@ -36,7 +36,7 @@ namespace graphql::database::object
         {
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement select(session);
-            select << "SELECT id, first_name, last_name, email, title, login, password FROM User where id=?",
+            select << "SELECT id, first_name, last_name, email, title, login, password FROM users where id=$1",
                 into(user_impl->_id),
                 into(user_impl->_first_name),
                 into(user_impl->_last_name),
@@ -55,12 +55,14 @@ namespace graphql::database::object
             return std::make_shared<User>(user_impl);
         }
 
-        catch (Poco::Data::MySQL::ConnectionException &e)
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
         {
+             std::cout << "connection:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
-        catch (Poco::Data::MySQL::StatementException &e)
+        catch (Poco::Data::PostgreSQL::StatementException &e)
         {
+             std::cout << "statement:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
     }
@@ -75,7 +77,7 @@ namespace graphql::database::object
 
             std::vector<std::shared_ptr<User>> result;
             auto user_impl = std::make_shared<UserImpl>();
-            select << "SELECT id, first_name, last_name, email, title,login, password FROM User",
+            select << "SELECT id, first_name, last_name, email, title,login, password FROM users",
                 into(user_impl->_id),
                 into(user_impl->_first_name),
                 into(user_impl->_last_name),
@@ -96,12 +98,14 @@ namespace graphql::database::object
             }
             return result;
         }
-        catch (Poco::Data::MySQL::ConnectionException &e)
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
         {
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
-        catch (Poco::Data::MySQL::StatementException &e)
+        catch (Poco::Data::PostgreSQL::StatementException &e)
         {
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
     }
@@ -117,7 +121,7 @@ namespace graphql::database::object
 
             std::vector<std::shared_ptr<User>> result;
             auto user_impl = std::make_shared<UserImpl>();
-            select << "SELECT id, first_name, last_name, email, title, login, password FROM User WHERE first_name LIKE ? AND last_name LIKE ?",
+            select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE first_name LIKE $1 AND last_name LIKE $2",
                 into(user_impl->_id),
                 into(user_impl->_first_name),
                 into(user_impl->_last_name),
@@ -140,12 +144,14 @@ namespace graphql::database::object
             }
             return result;
         }
-        catch (Poco::Data::MySQL::ConnectionException &e)
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
         {
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
-        catch (Poco::Data::MySQL::StatementException &e)
+        catch (Poco::Data::PostgreSQL::StatementException &e)
         {
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw std::logic_error(e.what());
         }
     }
@@ -170,8 +176,8 @@ namespace graphql::database::object
             std::cout << "mutation" << std::endl; 
             Poco::Data::Session session = ::db::Database::get().create_session();
             Poco::Data::Statement insert(session);
-            long _id;
-            insert << "INSERT INTO User (first_name,last_name,email,title,login,password) VALUES(?, ?, ?, ?,?,?)",
+            long _id{1};
+            insert << "INSERT INTO users (first_name,last_name,email,title,login,password) VALUES($1, $2, $3, $4, $5, $6)",
                 use(first_nameArg),
                 use(last_nameArg),
                 use(emailArg),
@@ -181,34 +187,22 @@ namespace graphql::database::object
             std::cout << insert.toString() << std::endl;
             insert.execute();
 
-
-            Poco::Data::Statement select(session);
-            select << "SELECT LAST_INSERT_ID()",
-                into(_id),
-                range(0, 1); //  iterate over result set one row at a time
-
-
-            if (!select.done())
-            {
-                select.execute();
-            }
-
             return std::to_string(_id);
         }
-        catch (Poco::Data::MySQL::ConnectionException &e)
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
         {
             std::cout << "connection:" << e.what() << std::endl;
             throw;
         }
-        catch (Poco::Data::MySQL::StatementException &e)
+        catch (Poco::Data::PostgreSQL::StatementException &e)
         {
 
-            std::cout << "statement:" << e.what() << std::endl;
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw;
         }
-        catch (Poco::Data::MySQL::MySQLException &e){
+        catch (Poco::Data::PostgreSQL::PostgreSQLException &e){
             
-            std::cout << "other:" << e.message() << std::endl;
+            std::cout << "connection:" << e.displayText() << std::endl;
             throw;
         }
     }

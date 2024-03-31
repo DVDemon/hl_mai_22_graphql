@@ -16,6 +16,47 @@
 * ServiceMock.h
 * ServiceMock.cpp
 
+Код подучения сервиса
+```cpp
+    std::shared_ptr<graphql::service::Request> GetService()
+    {
+        std::shared_ptr<Query> query = std::make_shared<Query>(std::make_shared<QueryImpl>());
+        std::shared_ptr<Mutations> mutation = std::make_shared<Mutations>(std::make_shared<MutationsImpl>());
+        auto service = std::make_shared<Operations>(std::move(query),std::move(mutation));
+        return service;
+    }
+```
+
+Код обработки http запроса
+
+```cpp
+        std::ostream &ostr = rsp.send();
+        auto service = graphql::database::object::GetService();
+
+        try
+        {
+            graphql::peg::ast query;
+
+            std::istream_iterator<char> start{request.stream() >> std::noskipws}, end{};
+            std::string input{start, end};
+
+            query = graphql::peg::parseString(std::move(input));
+
+            if (!query.root)
+            {
+                std::cerr << "Unknown error!" << std::endl;
+                std::cerr << std::endl;
+            }
+
+            ostr << graphql::response::toJSON(service->resolve({query, ""}).get())
+                 << std::endl;
+        }
+        catch (const std::runtime_error &ex)
+        {
+            std::cerr << "exception:" << ex.what() << std::endl;
+        }
+```
+
 ### Полезные ссылки про GraphQL
 
 * https://graphql.org/graphql-js/language/
@@ -24,6 +65,7 @@
 
 ### Схема
 
+```graphql
 schema {
   query: Query
   mutation: Mutations
@@ -53,11 +95,16 @@ type User  {
   login:String!
   password:String!
 }
-
+```
 
 
 ### Примеры запросов
 
+Пробуем из Postman
+
+#### Поиск по маске
+
+```graphql
 query {
     search(term1:"I%", term2:"I%"){
         id,
@@ -69,7 +116,11 @@ query {
         password
     }
 }
+```
 
+#### Поиск всех
+
+```graphql
 query {
     all_users{
         id,
@@ -81,7 +132,11 @@ query {
         password
     }
 }
+```
 
+#### Поиск по id
+
+```graphql
 query {
     get_user(id:1){
         id,
@@ -93,7 +148,11 @@ query {
         password
     }
 }
+```
 
+#### Добавление 
+
+```graphql
 mutation{
     add_user(first_name: "Ivan",
                    last_name: "Ivanov",
@@ -102,3 +161,4 @@ mutation{
                    login: "ivanov",
                    password: "12345678")
 }
+```

@@ -11,7 +11,7 @@ LIST(APPEND GRAPHQL_LIBS "graphqlresponse")
 LIST(APPEND GRAPHQL_LIBS "graphqlservice")
 
 SET (POCO_DATA_LIBS "PocoData")
-LIST(APPEND POCO_DATA_LIBS "PocoDataMySQL")
+LIST(APPEND POCO_DATA_LIBS "PocoDataPostgreSQL")
 
 find_package(OpenSSL)
 find_package(Threads)

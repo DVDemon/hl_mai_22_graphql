@@ -55,23 +55,22 @@ protected:
 
             Poco::Data::Session session = db::Database::get().create_session();
             Poco::Data::Statement create_stmt(session);
-            create_stmt << "CREATE TABLE IF NOT EXISTS `User` (`id` INT NOT NULL AUTO_INCREMENT,"
-                        << "`first_name` VARCHAR(256) NOT NULL,"
-                        << "`last_name` VARCHAR(256) NOT NULL,"
-                        << "`login` VARCHAR(256) NOT NULL,"
-                        << "`password` VARCHAR(256) NOT NULL,"
-                        << "`email` VARCHAR(256) NULL,"
-                        << "`title` VARCHAR(1024) NULL,"
-                        << "PRIMARY KEY (`id`),KEY `fn` (`first_name`),KEY `ln` (`last_name`));",
+            create_stmt << "CREATE TABLE IF NOT EXISTS users (id SERIAL,"
+                        << "first_name VARCHAR(256) NOT NULL,"
+                        << "last_name VARCHAR(256) NOT NULL,"
+                        << "login VARCHAR(256) NOT NULL,"
+                        << "password VARCHAR(256) NOT NULL,"
+                        << "email VARCHAR(256) NULL,"
+                        << "title VARCHAR(1024) NULL);",
                 now;
         }
 
-        catch (Poco::Data::MySQL::ConnectionException &e)
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
         {
             std::cout << "connection:" << e.what() << std::endl;
             throw;
         }
-        catch (Poco::Data::MySQL::StatementException &e)
+        catch (Poco::Data::PostgreSQL::StatementException &e)
         {
 
             std::cout << "statement:" << e.what() << std::endl;
